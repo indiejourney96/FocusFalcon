@@ -1,29 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getFromStorage } from "../utils/storage.js";
 
 export default function App() {
+  const [blockedSites, setBlockedSites] = useState([]);
+  const [avatar, setAvatar] = useState("");
+
+  useEffect(() => {
+    async function fetchData() {
+      const sites = (await getFromStorage("blockedSites")) || [];
+      const av = (await getFromStorage("avatar")) || "falcon";
+      setBlockedSites(sites);
+      setAvatar(av);
+    }
+    fetchData();
+  }, []);
+
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>🦅 FocusFalcon</h1>
-      <p style={styles.text}>
-        Block distractions. Build focus.
-      </p>
+    <div style={{ padding: 16, textAlign: "center", width: 300 }}>
+      <h1>🦅 FocusFalcon</h1>
+      <p>Blocked Sites:</p>
+      <ul>
+        {blockedSites.map((site) => (
+          <li key={site}>{site}</li>
+        ))}
+      </ul>
+      <p>Avatar: {avatar}</p>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    width: 300,
-    padding: 16,
-    fontFamily: "system-ui, sans-serif",
-  },
-  title: {
-    margin: 0,
-    fontSize: 20,
-  },
-  text: {
-    marginTop: 8,
-    fontSize: 14,
-    opacity: 0.8,
-  },
-};
