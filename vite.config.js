@@ -16,9 +16,10 @@ export default defineConfig({
         background: resolve(__dirname, "src/background/index.js"),
       },
       output: {
-        entryFileNames: "[name].js",
-        // 🔑 CRITICAL: stop shared chunking
-        manualChunks: undefined,
+        entryFileNames: (chunk) =>
+          chunk.name === "background" ? "background.js" : "[name].js",
+        chunkFileNames: "assets/[name].js",
+        format: "es"
       },
     },
   },
