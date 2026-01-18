@@ -53,14 +53,26 @@ export async function enableBlocking(sites) {
 
 export async function disableBlocking() {
     try {
-        const existing = await browser.declarativeNetRequest.getDynamicRules();
-        console.log("🗑 Existing rules before removing:", existing);
+        // 1️⃣ Get all active dynamic rules
+        const existingRules = await browser.declarativeNetRequest.getDynamicRules();
+        console.log("🗑 Existing rules before removing:", existingRules);
 
+        // 2️⃣ Remove all rules
         await browser.declarativeNetRequest.updateDynamicRules({
-            removeRuleIds: existing.map((r) => r.id),
+            removeRuleIds: existingRules.map(r => r.id)
         });
         console.log("✅ Blocking rules removed successfully");
 
+        // 3️⃣ Reload only tabs that were blocked
+        const blockedFilters = existingRules.map(r => r.condition.urlFilter); 
+        const allTabs = await browser.tabs.query({});
+
+        for (const tab of allTabs) {
+            if (tab.url && blockedFilters.some(filter => tab.url.includes(filter.replace(/\*+/g, "")))) {
+                console.log("🔄 Reloading previously blocked tab:", tab.url);
+                browser.tabs.reload(tab.id);
+            }
+        }
     } catch (err) {
         console.error("❌ Error removing blocking rules:", err);
     }
