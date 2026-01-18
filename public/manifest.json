@@ -3,26 +3,23 @@
   "name": "FocusFalcon",
   "description": "Block distractions. Build focus. Feel good doing it.",
   "version": "0.1.0",
-
   "action": {
     "default_popup": "popup.html"
   },
-
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
-
   "permissions": [
     "storage",
     "alarms",
     "declarativeNetRequest"
   ],
-
   "host_permissions": [
-    "<all_urls>"
+    "*://*.youtube.com/*",
+    "*://*.reddit.com/*",
+    "*://*.twitter.com/*"
   ],
-
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

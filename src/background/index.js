@@ -1,5 +1,5 @@
 import "webextension-polyfill";
-
+import "./messageRouter.js";
 import browser from "webextension-polyfill";
 import { setToStorage, getFromStorage } from "../utils/storage.js";
 import {
