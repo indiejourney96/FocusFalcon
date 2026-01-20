@@ -14,7 +14,18 @@
     "storage",
     "alarms",
     "declarativeNetRequest",
-    "browsingData"
+    "browsingData",
+    "webNavigation"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "mainpage/blocked.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ],
   "host_permissions": [
     "<all_urls>"

@@ -10,6 +10,8 @@ import {
   DEFAULT_AVATAR,
 } from "../utils/defaults.js";
 
+let blockedSites = [];
+
 console.log("🦅 FocusFalcon background loaded");
 
 browser.runtime.onInstalled.addListener(async () => {
@@ -37,4 +39,20 @@ browser.runtime.onInstalled.addListener(async () => {
   }
 
   console.log("✅ Default settings initialized");
+});
+
+
+// Redirect listener
+browser.webNavigation.onBeforeNavigate.addListener(async (details) => {
+  const url = new URL(details.url);
+  const hostname = url.hostname;
+
+  // Always fetch the latest blocked sites from storage
+  const blockedSites = (await getFromStorage("blockedSites")) || [];
+
+  if (blockedSites.some(site => hostname.includes(site))) {
+    const redirectUrl = browser.runtime.getURL(`mainpage/blocked.html?site=${hostname}`);
+    console.log(`🔀 Redirecting ${details.url} to ${redirectUrl}`);
+    browser.tabs.update(details.tabId, { url: redirectUrl });
+  }
 });
