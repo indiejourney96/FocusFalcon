@@ -13,12 +13,11 @@
   "permissions": [
     "storage",
     "alarms",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "browsingData"
   ],
   "host_permissions": [
-    "*://*.youtube.com/*",
-    "*://*.reddit.com/*",
-    "*://*.twitter.com/*"
+    "<all_urls>"
   ],
   "icons": {
     "16": "icons/icon16.png",

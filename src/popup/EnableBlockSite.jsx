@@ -6,7 +6,7 @@ export default function EnableBlockSite() {
       onClick={() => {
         browser.runtime.sendMessage({
           type: "ENABLE_BLOCKING",
-          sites: ["youtube.com"]
+          sites: ["youtube.com", "9gag.com", "reddit.com"]
         });
       }}
     >
