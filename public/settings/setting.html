@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>FocusFalcon Settings</title>
+</head>
+
+<body>
+  <label>Blocked Sites (one per line)</label>
+  <textarea id="blockedSites" rows="8" placeholder="facebook.com"></textarea>
+
+  <label>
+    <input type="checkbox" id="enableSchedule" />
+    Enable time-based blocking
+  </label>
+
+  <label>Time ranges</label>
+  <input type="time" id="startTime">
+  <input type="time" id="endTime">
+
+  <label>Days</label>
+  <label><input type="checkbox" value="1"> Mon</label>
+  <label><input type="checkbox" value="2"> Tue</label>
+  <label><input type="checkbox" value="3"> Wed</label>
+  <label><input type="checkbox" value="4"> Thu</label>
+  <label><input type="checkbox" value="5"> Fri</label>
+  <label><input type="checkbox" value="6"> Sat</label>
+  <label><input type="checkbox" value="0"> Sun</label>
+
+  <button id="saveSettings">Save</button>
+
+  <script type="module" src="setting.js"></script>
+</body>
+</html>

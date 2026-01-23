@@ -1,48 +1,71 @@
 import browser from "webextension-polyfill";
-import { getFromStorage, setToStorage } from "../utils/storage.js";
+import { getFromStorage } from "../utils/storage.js";
 
-export async function enableBlocking(sites) {
-    let blockedSites = (await getFromStorage("blockedSites")) || [];
-    blockedSites = [...new Set([...blockedSites, ...sites])];
-    await setToStorage("blockedSites", blockedSites);
-    console.log("✅ Updated blocked sites:", blockedSites);
+/**
+ * Decide whether a URL should be blocked right now
+ */
+export async function shouldBlockUrl(url) {
+  let parsedUrl;
 
-    // Reload affected tabs to enforce redirect
-    const tabs = await browser.tabs.query({});
-    for (const tab of tabs) {
-        if (!tab.url || (!tab.url.startsWith("http://") && !tab.url.startsWith("https://"))) {
-            // Skip non-http/https tabs
-            continue;
-        }
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return false;
+  }
 
-        const tabUrl = new URL(tab.url);
+  const hostname = parsedUrl.hostname;
 
-        // Check if tab hostname matches any blocked site
-        if (blockedSites.some(site => tabUrl.hostname.includes(site))) {
-            console.log("🔄 Reloading tab to enforce redirect:", tab.url);
-            browser.tabs.reload(tab.id);
-        }
-    }
+  const {
+    blockedSites = [],
+    blockRules = { enabled: false },
+    pauseState = { isPaused: false }
+  } = await getFromStorage([
+    "blockedSites",
+    "blockRules",
+    "pauseState"
+  ]);
+
+  // 1️⃣ Paused = never block
+  if (pauseState.isPaused) return false;
+
+  // 2️⃣ Domain not in block list
+  if (!matchesBlockedSite(hostname, blockedSites)) {
+    return false;
+  }
+
+  // 3️⃣ No schedule → always block
+  if (!blockRules.enabled) {
+    return true;
+  }
+
+  // 4️⃣ Schedule enabled → check time
+  return isWithinSchedule(blockRules);
 }
 
-export async function disableBlocking() {
-    let blockedSites = await getFromStorage("blockedSites") || [];
-
-    // Clear all blocked sites
-    blockedSites = [];
-    await setToStorage("blockedSites", blockedSites);
-    console.log("✅ All blocked sites cleared");
-
-    // Reload all tabs that used to match blocked sites
-    const tabs = await browser.tabs.query({});
-    for (const tab of tabs) {
-        if (!tab.url || (!tab.url.startsWith("http://") && !tab.url.startsWith("https://"))) continue;
-
-        const tabUrl = new URL(tab.url);
-        if (blockedSites.some(site => tabUrl.hostname.includes(site))) {
-            console.log("🔄 Reloading tab to restore access:", tab.url);
-            browser.tabs.reload(tab.id);
-        }
-    }
+/**
+ * Match hostname against blocked domains
+ * (youtube.com matches www.youtube.com, m.youtube.com, etc)
+ */
+function matchesBlockedSite(hostname, blockedSites) {
+  return blockedSites.some(site =>
+    hostname === site || hostname.endsWith("." + site)
+  );
 }
+
+/**
+ * Check if current time falls within allowed blocking schedule
+ */
+function isWithinSchedule(schedule) {
+  const now = new Date();
+
+  const day = now.getDay(); // 0 (Sun) → 6 (Sat)
+  const time = now.toTimeString().slice(0, 5); // HH:mm
+
+  if (!schedule.days.includes(day)) return false;
+
+  return schedule.timeRanges.some(range =>
+    time >= range.start && time <= range.end
+  );
+}
+
 

@@ -3,7 +3,7 @@ import browser from "webextension-polyfill";
 // Get data from storage
 export async function getFromStorage(key) {
   const result = await browser.storage.local.get(key);
-  return result[key];
+  return result;
 }
 
 // Set data to storage

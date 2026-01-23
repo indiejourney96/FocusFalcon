@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Site Blocked</title>
+
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; background: #f8f8f8; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f8f8f8;
+    }
     h1 { color: #d33; }
     p { font-size: 1.1rem; }
-    a { color: #0077cc; text-decoration: none; }
   </style>
 </head>
 <body>
@@ -15,10 +20,7 @@
   <p id="blocked-site"></p>
   <p>You can come back later. Stay focused!</p>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const site = params.get('site');
-    document.getElementById('blocked-site').textContent = site ? site : '';
-  </script>
+  <!-- ✅ External script ONLY -->
+  <script src="./blocked.js"></script>
 </body>
 </html>

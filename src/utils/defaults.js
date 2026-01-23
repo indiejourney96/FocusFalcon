@@ -5,10 +5,11 @@ export const DEFAULT_BLOCKED_SITES = [
 ];
 
 export const DEFAULT_SCHEDULE = {
-  activeDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-  startHour: 9,
-  endHour: 17,
+  enabled: false,
+  days: [1,2,3,4,5], // Mon-Fri
+  timeRanges: [{ start: "09:00", end: "17:00" }]
 };
+
 
 export const DEFAULT_STREAK = {
   days: 0,
