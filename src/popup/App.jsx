@@ -170,7 +170,7 @@ export default function App() {
       )}
 
       {/* CASE B & C: No active schedule → Focus Session */}
-      {!canPauseSchedule && !inFocusSession && (
+      {!inFocusSession && !scheduleActiveNow && !isPaused && (
         <>
           <input
             type="number"
