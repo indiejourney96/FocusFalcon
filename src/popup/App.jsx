@@ -1,73 +1,187 @@
 import React, { useEffect, useState } from "react";
-import { getFromStorage, setToStorage } from "../utils/storage.js";
 import browser from "webextension-polyfill";
+import { getFromStorage, setToStorage } from "../utils/storage.js";
 
 export default function App() {
   const [blockedSites, setBlockedSites] = useState([]);
-  const [avatar, setAvatar] = useState("");
-  const [isPaused, setIsPaused] = useState(false);
+  const [avatar, setAvatar] = useState("falcon");
 
-  // Fetch initial data
+  const [isPaused, setIsPaused] = useState(false);
+  const [focusSession, setFocusSession] = useState({ isActive: false });
+  const [blockRules, setBlockRules] = useState({ enabled: false });
+  const [duration, setDuration] = useState(25);
+
+
+  /* -----------------------------
+     INITIAL LOAD
+  ------------------------------*/
   useEffect(() => {
-    async function fetchData() {
-      const { blockedSites = [], avatar = "falcon", pauseState = { isPaused: false } } =
-        await getFromStorage(["blockedSites", "avatar", "pauseState"]);
+    async function load() {
+      const {
+        blockedSites = [],
+        avatar = "falcon",
+        pauseState = { isPaused: false },
+        focusSession = { isActive: false },
+        blockRules = { enabled: false }
+      } = await getFromStorage([
+        "blockedSites",
+        "avatar",
+        "pauseState",
+        "focusSession",
+        "blockRules"
+      ]);
 
       setBlockedSites(blockedSites);
       setAvatar(avatar);
       setIsPaused(pauseState.isPaused);
+      setFocusSession(focusSession);
+      setBlockRules(blockRules);
     }
-    fetchData();
+
+    load();
   }, []);
 
-  // Toggle pause state
-  const togglePause = async () => {
-    const newState = !isPaused;
+  /* -----------------------------
+     FOCUS SESSION (NO SCHEDULE)
+  ------------------------------*/
+  const startFocusSession = async () => {
+    const minutes = Number(duration);
+    if (!minutes || minutes <= 0) return;
 
-    // Update storage
-    await setToStorage("pauseState", { isPaused: newState, timestamp: Date.now() });
-    setIsPaused(newState);
+    const endTimestamp = Date.now() + minutes * 60 * 1000;
 
-    console.log(`⏸ Pause state updated: ${newState}`);
+    await setToStorage("focusSession", {
+      isActive: true,
+      endTimestamp
+    });
 
-    // ✅ If resuming, refresh all tabs that match blocked sites
-    if (!newState && blockedSites.length > 0) {
-      const tabs = await browser.tabs.query({});
-      for (const tab of tabs) {
-        if (!tab.url || (!tab.url.startsWith("http://") && !tab.url.startsWith("https://"))) continue;
-        const tabUrl = new URL(tab.url);
-        if (blockedSites.some(site => tabUrl.hostname === site || tabUrl.hostname.endsWith("." + site))) {
-          console.log("🔄 Refreshing tab to enforce blocking:", tab.url);
-          await browser.tabs.reload(tab.id);
-        }
+    setFocusSession({ isActive: true, endTimestamp });
+
+    // 🔄 Enforce immediately
+    refreshBlockedTabs();
+  };
+
+
+  const endFocusSession = async () => {
+    const confirmed = confirm(
+      "⚠ End focus session early?\nYour blocks will be removed."
+    );
+    if (!confirmed) return;
+
+    await setToStorage("focusSession", {
+      isActive: false,
+      endTimestamp: null
+    });
+
+    setFocusSession({ isActive: false });
+  };
+
+  /* -----------------------------
+     SCHEDULE PAUSE / RESUME
+  ------------------------------*/
+  const pauseBlocking = async () => {
+    const confirmed = confirm(
+      "⚠ Pause blocking?\nThis breaks your schedule discipline."
+    );
+    if (!confirmed) return;
+
+    await setToStorage("pauseState", {
+      isPaused: true,
+      timestamp: Date.now()
+    });
+
+    setIsPaused(true);
+  };
+
+  const resumeBlocking = async () => {
+    await setToStorage("pauseState", {
+      isPaused: false,
+      timestamp: null
+    });
+
+    setIsPaused(false);
+    refreshBlockedTabs();
+  };
+
+  /* -----------------------------
+     TAB ENFORCEMENT
+  ------------------------------*/
+  const refreshBlockedTabs = async () => {
+    const tabs = await browser.tabs.query({});
+
+    for (const tab of tabs) {
+      if (!tab.url || !tab.url.startsWith("http")) continue;
+
+      const hostname = new URL(tab.url).hostname;
+      if (
+        blockedSites.some(
+          site => hostname === site || hostname.endsWith("." + site)
+        )
+      ) {
+        await browser.tabs.reload(tab.id);
       }
     }
   };
 
+  /* -----------------------------
+     UI STATE
+  ------------------------------*/
+  const isScheduleActive = blockRules.enabled;
+  const inFocusSession = focusSession.isActive;
+
   return (
-    <div style={{ padding: 16, textAlign: "center", width: 300 }}>
-      <h1>🦅 FocusFalcon</h1>
+    <div style={{ padding: 16, width: 300, textAlign: "center" }}>
+      <h2>🦅 FocusFalcon</h2>
 
-      <button onClick={togglePause} style={{ marginBottom: 8 }}>
-        {isPaused ? "▶ Resume Blocking" : "⏸ Pause Blocking"}
-      </button>
+      {/* Avatar (future expansion point) */}
+      <p>Avatar: <strong>{avatar}</strong></p>
 
-      <button
-        id="openSettings"
-        onClick={() => browser.runtime.openOptionsPage()}
-        style={{ marginBottom: 16 }}
-      >
+      {!isScheduleActive && !inFocusSession && (
+        <>
+          <input
+            type="number"
+            min="1"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            style={{ width: "100%", marginBottom: 8 }}
+          />
+          <button onClick={startFocusSession}>
+            🎯 Start Focus Session
+          </button>
+        </>
+      )}
+
+
+      {inFocusSession && (
+        <button onClick={endFocusSession}>
+          ⛔ End Focus Session
+        </button>
+      )}
+
+      {isScheduleActive && !isPaused && (
+        <button onClick={pauseBlocking}>
+          ⏸ Pause Lock
+        </button>
+      )}
+
+      {isScheduleActive && isPaused && (
+        <button onClick={resumeBlocking}>
+          ▶ Resume Lock
+        </button>
+      )}
+
+      <hr />
+
+      <button onClick={() => browser.runtime.openOptionsPage()}>
         ⚙ Settings
       </button>
 
-      <p>Blocked Sites:</p>
+      <p style={{ marginTop: 12 }}>Blocked Sites:</p>
       <ul>
-        {blockedSites.map((site) => (
+        {blockedSites.map(site => (
           <li key={site}>{site}</li>
         ))}
       </ul>
-
-      <p>Avatar: {avatar}</p>
     </div>
   );
 }

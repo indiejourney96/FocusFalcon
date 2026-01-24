@@ -84,21 +84,28 @@ browser.runtime.onMessage.addListener(async (msg) => {
  * Core blocking enforcement
  */
 browser.webNavigation.onBeforeNavigate.addListener(async (details) => {
-  if (!details.url || !details.url.startsWith("http")) return;
+  console.log("🌐 onBeforeNavigate fired:", details.url);
+  
+  if (!details.url || !details.url.startsWith("http")) {
+    console.log("❌ Ignored non-http URL");
+    return;
+  }
 
   const shouldBlock = await shouldBlockUrl(details.url);
 
-  if (!shouldBlock) {
-    console.log("✅ Allowed:", details.url);
-    return;
-  }
+  console.log(
+    shouldBlock ? "⛔ WILL BLOCK" : "✅ Allowed:",
+    details.url
+  );
+
+  if (!shouldBlock) return;
 
   const hostname = new URL(details.url).hostname;
   const redirectUrl = browser.runtime.getURL(
     `mainpage/blocked.html?site=${hostname}`
   );
 
-  console.log(`🔀 Blocking ${details.url}`);
+  console.log("🔀 Redirecting to block page:", redirectUrl);
 
   await browser.tabs.update(details.tabId, { url: redirectUrl });
 });
