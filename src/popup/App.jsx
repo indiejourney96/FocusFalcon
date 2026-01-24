@@ -123,10 +123,29 @@ export default function App() {
     }
   };
 
+  const isWithinScheduleNow = (blockRules) => {
+    if (!blockRules?.enabled) return false;
+
+    const now = new Date();
+    const day = now.getDay();
+    const time = now.toTimeString().slice(0, 5);
+
+    if (!blockRules.days?.includes(day)) return false;
+
+    return blockRules.timeRanges?.some(
+      range => time >= range.start && time <= range.end
+    );
+  };
+
+
   /* -----------------------------
      UI STATE
   ------------------------------*/
-  const isScheduleActive = blockRules.enabled;
+  const scheduleActiveNow =
+    isWithinScheduleNow(blockRules) && !isPaused;
+
+  const canPauseSchedule = scheduleActiveNow;
+
   const inFocusSession = focusSession.isActive;
 
   return (
@@ -136,7 +155,22 @@ export default function App() {
       {/* Avatar (future expansion point) */}
       <p>Avatar: <strong>{avatar}</strong></p>
 
-      {!isScheduleActive && !inFocusSession && (
+
+      {/* CASE A: Scheduled blocking active now */}
+      {canPauseSchedule && (
+        <button onClick={pauseBlocking}>
+          ⏸ Pause Blocking
+        </button>
+      )}
+
+      {blockRules.enabled && isPaused && (
+        <button onClick={resumeBlocking}>
+          ▶ Resume Blocking
+        </button>
+      )}
+
+      {/* CASE B & C: No active schedule → Focus Session */}
+      {!canPauseSchedule && !inFocusSession && (
         <>
           <input
             type="number"
@@ -146,27 +180,14 @@ export default function App() {
             style={{ width: "100%", marginBottom: 8 }}
           />
           <button onClick={startFocusSession}>
-            🎯 Start Focus Session
+            🎯 Activate Focus Session
           </button>
         </>
       )}
 
-
       {inFocusSession && (
         <button onClick={endFocusSession}>
           ⛔ End Focus Session
-        </button>
-      )}
-
-      {isScheduleActive && !isPaused && (
-        <button onClick={pauseBlocking}>
-          ⏸ Pause Lock
-        </button>
-      )}
-
-      {isScheduleActive && isPaused && (
-        <button onClick={resumeBlocking}>
-          ▶ Resume Lock
         </button>
       )}
 
