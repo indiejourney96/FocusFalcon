@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import browser from "webextension-polyfill";
 import { getFromStorage, setToStorage } from "../utils/storage.js";
+import HoldButton from "./components/HoldButton.jsx";
+
 
 export default function App() {
   const [blockedSites, setBlockedSites] = useState([]);
@@ -63,9 +65,7 @@ export default function App() {
 
 
   const endFocusSession = async () => {
-    const confirmed = confirm(
-      "⚠ End focus session early?\nYour blocks will be removed."
-    );
+    const confirmed = confirm(getEncouragingMessage("endFocusSession"));
     if (!confirmed) return;
 
     await setToStorage("focusSession", {
@@ -80,9 +80,7 @@ export default function App() {
      SCHEDULE PAUSE / RESUME
   ------------------------------*/
   const pauseBlocking = async () => {
-    const confirmed = confirm(
-      "⚠ Pause blocking?\nThis breaks your schedule discipline."
-    );
+    const confirmed = confirm(getEncouragingMessage("pauseBlocking"));
     if (!confirmed) return;
 
     await setToStorage("pauseState", {
@@ -158,10 +156,15 @@ export default function App() {
 
       {/* CASE A: Scheduled blocking active now */}
       {canPauseSchedule && (
-        <button onClick={pauseBlocking}>
-          ⏸ Pause Blocking
-        </button>
+        <HoldButton
+          text="⏸ Pause Blocking (hold to confirm)"
+          onHoldComplete={() => {
+            pauseBlocking(); // retains your confirm() message
+          }}
+          holdTime={2000} // 2 seconds hold
+        />
       )}
+
 
       {blockRules.enabled && isPaused && (
         <button onClick={resumeBlocking}>
@@ -186,9 +189,11 @@ export default function App() {
       )}
 
       {inFocusSession && (
-        <button onClick={endFocusSession}>
-          ⛔ End Focus Session
-        </button>
+        <HoldButton
+          text="⛔ End Focus Session (hold to confirm)"
+          onHoldComplete={endFocusSession} // call the existing function
+          holdTime={2000} // 2 seconds hold
+        />
       )}
 
       <hr />
@@ -205,4 +210,26 @@ export default function App() {
       </ul>
     </div>
   );
+}
+
+
+/* -----------------------------
+   HELPER: Random Encouraging Messages
+------------------------------*/
+function getEncouragingMessage(type) {
+  const messages = {
+    endFocusSession: [
+      "😬 Ending now…? Are you sure boss?",,
+      "🤔 Are you sure you want to stop? Your future 'you' might feel sad…",
+      "😅 End it now? Okay boss"
+    ],
+    pauseBlocking: [
+      "🤔 Pause now boss? Feels kinda risky…",
+      "😅 That pause button is tempting… Are you sure you want to pause now?",
+      "🤔 Hmmm… do we really wanna pause right now?"
+    ]
+  };
+
+  const selected = messages[type];
+  return selected[Math.floor(Math.random() * selected.length)];
 }
