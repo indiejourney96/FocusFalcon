@@ -1,0 +1,190 @@
+:root {
+  --primary: #FFB347; /* Soft Orange/Gold */
+  --primary-hover: #ffa01a;
+  --bg: #ffffff;
+  --text: #333d47;
+  --secondary: #f0f4f8;
+  --danger: #ff6b6b;
+  --border-radius: 12px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.container {
+  width: 320px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card {
+  background: var(--secondary);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  width: 100%;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s, background-color 0.2s;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background-color: var(--primary-hover);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--secondary);
+  color: #666;
+  margin-top: 10px;
+}
+
+.input-group {
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+input[type="number"] {
+  border: 2px solid var(--secondary);
+  border-radius: 8px;
+  padding: 8px;
+  width: 60px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.site-list {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  max-height: 100px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.site-item {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+/* Centering the Header */
+.header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* The Break Line */
+.divider {
+  border: 0;
+  height: 1px;
+  background: #eee;
+  margin: 12px 0;
+  width: 100%;
+}
+
+/* Beautified Blocked Site List */
+.sites-container {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.sites-label {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.sites-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.site-tag {
+  background: #f0f4f8;
+  color: #4a5568;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.site-tag:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+/* Styled Input Wrapper */
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--secondary);
+  padding: 8px;
+  border-radius: var(--border-radius);
+  margin-bottom: 8px;
+}
+
+.input-wrapper span {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Fix the number input to look cleaner */
+.focus-input {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 5px;
+  width: 50px;
+  text-align: center;
+  font-family: inherit;
+  outline: none;
+}
+
+.focus-input:focus {
+  border-color: var(--primary);
+}

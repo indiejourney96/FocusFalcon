@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import browser from "webextension-polyfill";
 import { getFromStorage, setToStorage } from "../utils/storage.js";
 import HoldButton from "./components/HoldButton.jsx";
-
+import "./popup.css";
 
 export default function App() {
   const [blockedSites, setBlockedSites] = useState([]);
@@ -147,67 +147,76 @@ export default function App() {
   const inFocusSession = focusSession.isActive;
 
   return (
-    <div style={{ padding: 16, width: 300, textAlign: "center" }}>
-      <h2>🦅 FocusFalcon</h2>
-
-      {/* Avatar (future expansion point) */}
-      <p>Avatar: <strong>{avatar}</strong></p>
+    <div className="container" style={{ padding: 16, width: 300 }}>
+      <div className="header-container">
+        <h2><span>🦅</span> FocusFalcon</h2>
+        <p style={{ fontSize: '0.9rem', color: '#666', marginTop: 4 }}>
+          Avatar: <strong>{avatar}</strong>
+        </p>
+      </div>
 
 
       {/* CASE A: Scheduled blocking active now */}
-      {canPauseSchedule && (
-        <HoldButton
-          text="⏸ Pause Blocking (hold to confirm)"
-          onHoldComplete={() => {
-            pauseBlocking(); // retains your confirm() message
-          }}
-          holdTime={2000} // 2 seconds hold
-        />
-      )}
-
-
-      {blockRules.enabled && isPaused && (
-        <button onClick={resumeBlocking}>
-          ▶ Resume Blocking
-        </button>
-      )}
-
-      {/* CASE B & C: No active schedule → Focus Session */}
-      {!inFocusSession && !scheduleActiveNow && !isPaused && (
-        <>
-          <input
-            type="number"
-            min="1"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            style={{ width: "100%", marginBottom: 8 }}
+      <div className="action-section">
+        {canPauseSchedule && (
+          <HoldButton
+            text="⏸ Pause Blocking (hold to confirm)"
+            onHoldComplete={() => {
+              pauseBlocking(); // retains your confirm() message
+            }}
+            holdTime={2000} // 2 seconds hold
           />
-          <button onClick={startFocusSession}>
-            🎯 Activate Focus Session
+        )}
+
+
+        {blockRules.enabled && isPaused && (
+          <button onClick={resumeBlocking} className="btn-primary">
+            ▶ Resume Blocking
           </button>
-        </>
-      )}
+        )}
 
-      {inFocusSession && (
-        <HoldButton
-          text="⛔ End Focus Session (hold to confirm)"
-          onHoldComplete={endFocusSession} // call the existing function
-          holdTime={2000} // 2 seconds hold
-        />
-      )}
+        {/* CASE B & C: No active schedule → Focus Session */}
+        {!inFocusSession && !scheduleActiveNow && !isPaused && (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="input-wrapper">
+              <input
+                type="number"
+                min="1"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="focus-input"
+              />
+              <span>minutes</span>
+            </div>
+            <button onClick={startFocusSession} className="btn-primary">
+              🎯 Activate Focus Session
+            </button>
+          </div>
+        )}
 
-      <hr />
+        {inFocusSession && (
+          <HoldButton
+            text="⛔ End Focus Session (hold to confirm)"
+            onHoldComplete={endFocusSession} // call the existing function
+            holdTime={2000} // 2 seconds hold
+          />
+        )}
+      </div>
 
-      <button onClick={() => browser.runtime.openOptionsPage()}>
+      <hr className="divider" />
+
+      <button className="btn-outline" onClick={() => browser.runtime.openOptionsPage()}>
         ⚙ Settings
       </button>
 
-      <p style={{ marginTop: 12 }}>Blocked Sites:</p>
-      <ul>
-        {blockedSites.map(site => (
-          <li key={site}>{site}</li>
-        ))}
-      </ul>
+      <div className="sites-container">
+        <span className="sites-label">Blocked Sites</span>
+        <ul className="sites-list">
+          {blockedSites.map(site => (
+            <li key={site} className="site-tag">{site}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
@@ -219,7 +228,7 @@ export default function App() {
 function getEncouragingMessage(type) {
   const messages = {
     endFocusSession: [
-      "😬 Ending now…? Are you sure boss?",,
+      "😬 Ending now…? Are you sure boss?", ,
       "🤔 Are you sure you want to stop? Your future 'you' might feel sad…",
       "😅 End it now? Okay boss"
     ],
