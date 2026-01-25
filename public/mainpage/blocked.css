@@ -1,0 +1,89 @@
+:root {
+  --primary: #FFB347; /* Falcon Gold */
+  --bg: #f8fafc;
+  --card-bg: #ffffff;
+  --text: #333d47;
+  --text-light: #64748b;
+  --accent: #f0f4f8;
+  --border-radius: 24px;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blocked-wrapper {
+  padding: 20px;
+  width: 100%;
+  max-width: 450px;
+}
+
+.blocked-card {
+  background: var(--card-bg);
+  padding: 40px 30px;
+  border-radius: var(--border-radius);
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.falcon-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  /* Soft float animation */
+  animation: float 3s ease-in-out infinite;
+}
+
+h1 {
+  font-size: 1.8rem;
+  color: var(--text);
+  margin: 0 0 20px 0;
+}
+
+.info-box {
+  background-color: var(--accent);
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 25px;
+}
+
+.blocked-site {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin: 0;
+  font-weight: 500;
+}
+
+.divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 15px auto;
+  width: 50%;
+}
+
+.return-time {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary); /* Gold color for the return time */
+  margin: 0;
+}
+
+.encouragement {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--text-light);
+  opacity: 0.8;
+}
+
+/* Animation to make it feel "cute" and alive */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}

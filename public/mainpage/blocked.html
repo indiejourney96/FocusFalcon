@@ -1,26 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <title>Site Blocked</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 2rem;
-      background: #f8f8f8;
-    }
-    h1 { color: #d33; }
-    p { font-size: 1.1rem; }
-  </style>
+  <title>FocusFalcon | Focus Zone</title>
+  <link rel="stylesheet" href="blocked.css" />
 </head>
-<body>
-  <h1>🚫 This site is blocked</h1>
-  <p id="blocked-site"></p>
-  <p>You can come back later. Stay focused!</p>
 
-  <!-- ✅ External script ONLY -->
-  <script src="./blocked.js"></script>
+<body>
+  <div class="blocked-wrapper">
+    <div class="blocked-card">
+      <div class="falcon-icon">🦅</div>
+      <h1>Stay Focused</h1>
+      
+      <div class="info-box">
+        <p id="blockedSite" class="blocked-site"></p>
+        <div class="divider"></div>
+        <p id="returnTime" class="return-time"></p>
+      </div>
+
+      <p class="encouragement">"The secret of getting ahead is getting started."</p>
+    </div>
+  </div>
+
+  <script type="module" src="blocked.js"></script>
 </body>
 </html>
