@@ -1,34 +1,69 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8" />
   <title>FocusFalcon Settings</title>
+  <link rel="stylesheet" href="setting.css">
 </head>
 
 <body>
-  <label>Blocked Sites (one per line)</label>
-  <textarea id="blockedSites" rows="8" placeholder="facebook.com"></textarea>
+  <div class="settings-container">
+    <header>
+      <h1>🦅 FocusFalcon Settings</h1>
+      <p>Configure your focus sanctuary</p>
+    </header>
 
-  <label>
-    <input type="checkbox" id="enableSchedule" />
-    Enable time-based blocking
-  </label>
+    <div class="settings-card">
+      <section class="settings-section">
+        <label class="section-title">Blocked Sites</label>
+        <p class="section-desc">
+          Enter domains you want to block (one per line)<br />
+          e.g., youtube.com
+        </p>
+        <textarea id="blockedSites" rows="6" placeholder="facebook.com&#10;instagram.com"></textarea>
+      </section>
 
-  <label>Time ranges</label>
-  <input type="time" id="startTime">
-  <input type="time" id="endTime">
+      <hr class="divider">
 
-  <label>Days</label>
-  <label><input type="checkbox" value="1"> Mon</label>
-  <label><input type="checkbox" value="2"> Tue</label>
-  <label><input type="checkbox" value="3"> Wed</label>
-  <label><input type="checkbox" value="4"> Thu</label>
-  <label><input type="checkbox" value="5"> Fri</label>
-  <label><input type="checkbox" value="6"> Sat</label>
-  <label><input type="checkbox" value="0"> Sun</label>
+      <section class="settings-section">
+        <div class="flex-header">
+          <label class="section-title">Time-Based Blocking</label>
+          <label class="switch">
+            <input type="checkbox" id="enableSchedule" />
+            <span class="slider"></span>
+          </label>
+        </div>
 
-  <button id="saveSettings">Save</button>
+        <div class="schedule-options">
+          <div class="time-group">
+            <div class="input-field">
+              <label>Start Time</label>
+              <input type="time" id="startTime">
+            </div>
+            <div class="input-field">
+              <label>End Time</label>
+              <input type="time" id="endTime">
+            </div>
+          </div>
 
+          <label class="sub-label">Active Days</label>
+          <div class="days-picker">
+            <label class="day-chip"><input type="checkbox" value="1"><span>Mon</span></label>
+            <label class="day-chip"><input type="checkbox" value="2"><span>Tue</span></label>
+            <label class="day-chip"><input type="checkbox" value="3"><span>Wed</span></label>
+            <label class="day-chip"><input type="checkbox" value="4"><span>Thu</span></label>
+            <label class="day-chip"><input type="checkbox" value="5"><span>Fri</span></label>
+            <label class="day-chip"><input type="checkbox" value="6"><span>Sat</span></label>
+            <label class="day-chip"><input type="checkbox" value="0"><span>Sun</span></label>
+          </div>
+        </div>
+      </section>
+
+      <button id="saveSettings" class="save-btn">Save Configurations</button>
+    </div>
+  </div>
   <script type="module" src="setting.js"></script>
 </body>
+
 </html>
