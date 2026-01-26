@@ -1,7 +1,5 @@
 export const DEFAULT_BLOCKED_SITES = [
-  "youtube.com",
-  "reddit.com",
-  "twitter.com",
+  "x.com",
 ];
 
 export const DEFAULT_SCHEDULE = {
