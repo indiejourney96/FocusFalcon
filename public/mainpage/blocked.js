@@ -39,20 +39,46 @@ async function init() {
   const siteEl = document.getElementById("blockedSite");
   const el = document.getElementById("returnTime");
   const blockedSite = getBlockedSiteFromUrl();
+  const avatarImg = document.getElementById("avatarImage");
+  const titleEl = document.querySelector("h1");
+
+  const {
+    avatar = "falcon",
+    focusSession,
+    blockRules
+  } = await ext.storage.local.get([
+    "avatar",
+    "focusSession",
+    "blockRules"
+  ]);
+
+  const AVATAR_META = {
+    falcon: {
+      image: "/icons/avatar-falcon.png",
+      title: "Stay Focused"
+    },
+    capybara: {
+      image: "/icons/avatar-capybara.png",
+      title: "Breathe. Stay Present."
+    },
+    redPanda: {
+      image: "/icons/avatar-red-panda.png",
+      title: "Let’s Finish This!"
+    }
+  };
+
+  const meta = AVATAR_META[avatar] || AVATAR_META.falcon;
+
+  // Apply avatar image + title
+  avatarImg.src = meta.image;
+  avatarImg.alt = avatar;
+  titleEl.textContent = meta.title;
 
   if (blockedSite) {
     siteEl.textContent = `🚫 ${blockedSite} is blocked right now`;
   } else {
     siteEl.textContent = "🚫 This site is blocked right now";
   }
-
-  const {
-    focusSession,
-    blockRules
-  } = await ext.storage.local.get([
-    "focusSession",
-    "blockRules"
-  ]);
 
   // Focus session takes priority
   if (focusSession?.isActive && focusSession.endTimestamp) {

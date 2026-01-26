@@ -4,7 +4,19 @@ const browser = window.browser || window.chrome;
 
 console.log("⚙️ Settings page loaded");
 
-const data = await browser.storage.local.get(["blockedSites", "blockRules"]);
+const data = await browser.storage.local.get([
+    "blockedSites",
+    "blockRules",
+    "avatar"
+]);
+
+// Load avatar
+const currentAvatar = data.avatar || "falcon";
+const avatarInput = document.querySelector(
+    `input[name="avatar"][value="${currentAvatar}"]`
+);
+if (avatarInput) avatarInput.checked = true;
+
 
 console.log("📦 Loaded from storage:", data);
 
@@ -61,10 +73,14 @@ document.getElementById("saveSettings").addEventListener("click", async () => {
         blockRules
     });
 
+    const selectedAvatar =
+        document.querySelector('input[name="avatar"]:checked')?.value || "falcon";
+
 
     await browser.storage.local.set({
         blockedSites: sites,
-        blockRules
+        blockRules,
+        avatar: selectedAvatar
     });
 
     const verify = await browser.storage.local.get([

@@ -210,3 +210,16 @@ input[type="time"] {
 
 input:checked + .slider { background-color: var(--primary); }
 input:checked + .slider:before { transform: translateX(20px); }
+
+.avatar-preview {
+  width: 55px;
+  height: 55px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 8px;
+  border: 2px solid transparent;
+}
+
+.avatar-option input:checked + .avatar-preview {
+  border-color: #1e90ff;
+}

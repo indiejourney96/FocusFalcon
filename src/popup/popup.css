@@ -188,3 +188,26 @@ input[type="number"] {
 .focus-input:focus {
   border-color: var(--primary);
 }
+
+
+/* Avatar display in App.jsx */
+.avatar-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  color: #666;
+  margin-top: 10px;
+}
+
+.avatar-display span {
+  font-weight: 500;
+}
+
+.avatar-image {
+  width: 50px;      /* bigger avatar */
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+}

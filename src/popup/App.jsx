@@ -3,6 +3,8 @@ import browser from "webextension-polyfill";
 import { getFromStorage, setToStorage } from "../utils/storage.js";
 import HoldButton from "./components/HoldButton.jsx";
 import "./popup.css";
+import { AVATARS } from "../utils/avatars.js";
+
 
 export default function App() {
   const [blockedSites, setBlockedSites] = useState([]);
@@ -149,9 +151,16 @@ export default function App() {
   return (
     <div className="container" style={{ padding: 16, width: 300 }}>
       <div className="header-container">
-        <h2><span>🦅</span> FocusFalcon</h2>
-        <p style={{ fontSize: '0.9rem', color: '#666', marginTop: 4 }}>
-          Avatar: <strong>{avatar}</strong>
+        <h2>FocusFalcon</h2>
+
+        <p className="avatar-display">
+          <span>Focus Guardian:</span>
+          <img
+            src={AVATARS[avatar]?.image}
+            alt={AVATARS[avatar]?.label}
+            className="avatar-image"
+          />
+          <strong>{AVATARS[avatar]?.label}</strong>
         </p>
       </div>
 
