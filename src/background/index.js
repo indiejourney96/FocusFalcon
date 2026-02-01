@@ -85,7 +85,13 @@ browser.runtime.onMessage.addListener(async (msg) => {
  */
 browser.webNavigation.onBeforeNavigate.addListener(async (details) => {
   console.log("🌐 onBeforeNavigate fired:", details.url);
-  
+
+  // ONLY handle main-frame navigations
+  if (details.frameId !== 0) {
+    console.log("🧩 Ignored subframe navigation:", details.url);
+    return;
+  }
+
   if (!details.url || !details.url.startsWith("http")) {
     console.log("❌ Ignored non-http URL");
     return;
