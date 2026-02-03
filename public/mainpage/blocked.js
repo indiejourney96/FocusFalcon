@@ -41,6 +41,7 @@ async function init() {
   const blockedSite = getBlockedSiteFromUrl();
   const avatarImg = document.getElementById("avatarImage");
   const titleEl = document.querySelector("h1");
+  const encouragementEl = document.getElementById("encouragement");
 
   const {
     avatar = "falcon",
@@ -63,9 +64,26 @@ async function init() {
     },
     redPanda: {
       image: "/icons/avatar-red-panda.png",
-      title: "Let’s Finish This!"
+      title: "Let's Finish This!"
     }
   };
+
+  const ENCOURAGEMENTS = {
+    falcon: [
+      "Control the impulse. Finish strong.",
+      "You’re in command right now."
+    ],
+    capybara: [
+      "This is a quiet moment just for you.",
+      "The work will feel lighter once you begin."
+    ],
+    redPanda: [
+      "Future you will thank you for this.",
+      "Hey! Weren’t we doing something cool?"
+    ]
+  };
+
+  const pickMessage = (list) => list[Math.floor(Math.random() * list.length)];
 
   const meta = AVATAR_META[avatar] || AVATAR_META.falcon;
 
@@ -73,6 +91,9 @@ async function init() {
   avatarImg.src = meta.image;
   avatarImg.alt = avatar;
   titleEl.textContent = meta.title;
+  encouragementEl.textContent = pickMessage(
+    ENCOURAGEMENTS[avatar] || ENCOURAGEMENTS.falcon
+  );
 
   if (blockedSite) {
     siteEl.textContent = `🚫 ${blockedSite} is blocked right now`;
