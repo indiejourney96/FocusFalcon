@@ -196,6 +196,24 @@ input[type="time"] {
   text-decoration: underline;
 }
 
+
+.privacy-note {
+  margin: 30px 0 0;
+  font-size: 0.70rem;
+  color: var(--text-light);
+  line-height: 1.4;
+}
+
+.privacy-note a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.privacy-note a:hover {
+  text-decoration: underline;
+}
+
 /* Custom Switch Toggle (Optional but Professional) */
 .switch {
   position: relative;
