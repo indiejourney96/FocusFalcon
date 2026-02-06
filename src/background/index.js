@@ -9,13 +9,15 @@ import {
   DEFAULT_AVATAR
 } from "../utils/defaults.js";
 
-console.log("🦅 FocusFalcon background loaded");
+const DEBUG = false; //change this to True for development
+
+if (DEBUG) console.log("FocusFalcon background loaded");
 
 /**
  * Install defaults once
  */
 browser.runtime.onInstalled.addListener(async () => {
-  console.log("📦 FocusFalcon installed – initializing defaults");
+  if (DEBUG) console.log("FocusFalcon installed – initializing defaults");
 
   const {
     blockedSites,
@@ -33,74 +35,48 @@ browser.runtime.onInstalled.addListener(async () => {
 
   if (!blockedSites) {
     await setToStorage("blockedSites", DEFAULT_BLOCKED_SITES);
-    console.log("✅ Default blockedSites set");
   }
 
   if (!blockRules) {
     await setToStorage("blockRules", DEFAULT_SCHEDULE);
-    console.log("✅ Default blockRules set");
   }
 
   if (!focusStreak) {
     await setToStorage("focusStreak", DEFAULT_STREAK);
-    console.log("✅ Default focusStreak set");
   }
 
   if (!pauseState) {
     await setToStorage("pauseState", DEFAULT_PAUSE_STATE);
-    console.log("✅ Default pauseState set");
   }
 
   if (!avatar) {
     await setToStorage("avatar", DEFAULT_AVATAR);
-    console.log("✅ Default avatar set");
   }
 
-  console.log("🎉 Default settings initialization complete");
-});
-
-/**
- * Pause / Resume handling
- */
-browser.runtime.onMessage.addListener(async (msg) => {
-  if (msg.type === "PAUSE_BLOCKING") {
-    await setToStorage("pauseState", {
-      isPaused: true,
-      timestamp: Date.now()
-    });
-    console.log("⏸ Blocking paused");
-  }
-
-  if (msg.type === "RESUME_BLOCKING") {
-    await setToStorage("pauseState", {
-      isPaused: false,
-      timestamp: null
-    });
-    console.log("▶️ Blocking resumed");
-  }
+  if (DEBUG) console.log("Default settings initialization complete");
 });
 
 /**
  * Core blocking enforcement
  */
 browser.webNavigation.onBeforeNavigate.addListener(async (details) => {
-  console.log("🌐 onBeforeNavigate fired:", details.url);
+  if (DEBUG) console.log("onBeforeNavigate fired:", details.url);
 
   // ONLY handle main-frame navigations
   if (details.frameId !== 0) {
-    console.log("🧩 Ignored subframe navigation:", details.url);
+    if (DEBUG) console.log("Ignored subframe navigation:", details.url);
     return;
   }
 
   if (!details.url || !details.url.startsWith("http")) {
-    console.log("❌ Ignored non-http URL");
+    if (DEBUG) console.log("Ignored non-http URL");
     return;
   }
 
   const shouldBlock = await shouldBlockUrl(details.url);
 
-  console.log(
-    shouldBlock ? "⛔ WILL BLOCK" : "✅ Allowed:",
+  if (DEBUG) console.log(
+    shouldBlock ? "WILL BLOCK" : "Allowed:",
     details.url
   );
 
@@ -111,7 +87,7 @@ browser.webNavigation.onBeforeNavigate.addListener(async (details) => {
     `mainpage/blocked.html?site=${hostname}`
   );
 
-  console.log("🔀 Redirecting to block page:", redirectUrl);
+  if (DEBUG) console.log("Redirecting to block page:", redirectUrl);
 
   await browser.tabs.update(details.tabId, { url: redirectUrl });
 });

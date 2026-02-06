@@ -4,14 +4,17 @@ import { getFromStorage } from "../utils/storage.js";
 /**
  * Decide whether a URL should be blocked right now
  */
+
+const DEBUG = false; //change this to True for development
+
 export async function shouldBlockUrl(url) {
-  console.log("🧠 shouldBlockUrl called for:", url);
+  if (DEBUG) console.log("shouldBlockUrl called for:", url);
   let parsedUrl;
 
   try {
     parsedUrl = new URL(url);
   } catch {
-    console.log("❌ Invalid URL");
+    if (DEBUG) console.log("Invalid URL");
     return false;
   }
 
@@ -24,8 +27,6 @@ export async function shouldBlockUrl(url) {
     "focusSession"
   ]);
 
-  console.log("📦 Storage snapshot:", data);
-
   const {
     blockedSites = [],
     blockRules = { enabled: false },
@@ -35,14 +36,14 @@ export async function shouldBlockUrl(url) {
 
   // 1️⃣ Focus session overrides EVERYTHING
   if (focusSession.isActive) {
-    console.log("🎯 Focus session ACTIVE");
+    if (DEBUG) console.log("Focus session ACTIVE");
 
     if (Date.now() < focusSession.endTimestamp) {
       const match = matchesBlockedSite(hostname, blockedSites);
-      console.log("🔒 Focus session match:", match);
+      if (DEBUG) console.log("Focus session match:", match);
       return match;
     } else {
-      console.log("⌛ Focus session expired");
+      if (DEBUG) console.log("Focus session expired");
       await browser.storage.local.set({
         focusSession: { isActive: false, endTimestamp: null }
       });
@@ -53,13 +54,13 @@ export async function shouldBlockUrl(url) {
 
   // 2️⃣ Pause only applies outside focus session
   if (pauseState.isPaused) {
-    console.log("⏸ Blocking paused");
+    if (DEBUG) console.log("⏸ Blocking paused");
     return false;
   }
 
   // 3️⃣ No schedule → no block
   if (!blockRules.enabled) {
-    console.log("📅 No schedule active");
+    if (DEBUG) console.log("No schedule active");
     return false;
   }
 
@@ -67,7 +68,7 @@ export async function shouldBlockUrl(url) {
   const domainMatch = matchesBlockedSite(hostname, blockedSites);
   const timeMatch = isWithinSchedule(blockRules);
 
-  console.log("📅 Schedule check:", {
+  if (DEBUG) console.log("Schedule check:", {
     domainMatch,
     timeMatch
   });
