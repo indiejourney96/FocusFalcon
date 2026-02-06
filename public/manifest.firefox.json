@@ -7,14 +7,12 @@
     "default_popup": "popup.html"
   },
   "background": {
-    "service_worker": "background.js",
+    "scripts": ["background.js"],
     "type": "module"
   },
   "permissions": [
     "storage",
     "alarms",
-    "declarativeNetRequest",
-    "browsingData",
     "webNavigation"
   ],
   "web_accessible_resources": [
