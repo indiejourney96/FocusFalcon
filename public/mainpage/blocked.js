@@ -4,7 +4,8 @@ function formatTime(timestamp) {
   const d = new Date(timestamp);
   return d.toLocaleTimeString([], {
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
+    second:"2-digit"
   });
 }
 
@@ -25,7 +26,7 @@ function getScheduleEndTime(blockRules) {
 
   const [h, m] = activeRange.end.split(":");
   const end = new Date();
-  end.setHours(h, m, 0, 0);
+  end.setHours(h, m, 59, 999); // End of the minute, include seconds and ms
 
   return end.getTime();
 }
