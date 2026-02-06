@@ -1,5 +1,7 @@
 export const DEFAULT_BLOCKED_SITES = [
-  "x.com",
+  "example1.com",
+  "example2.com",
+  "example3.com"
 ];
 
 export const DEFAULT_SCHEDULE = {
