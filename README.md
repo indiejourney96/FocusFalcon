@@ -15,7 +15,7 @@ A Firefox/Chrome extension to help users maintain focus by blocking distracting 
 
 **1. Extract the source archive**
 ```bash
-unzip focusfalcon-source-0.1.0.zip
+unzip focusfalcon-source-0.1.1.zip
 cd focusfalcon
 ```
 
@@ -86,6 +86,8 @@ dist/
 5. Code is minified for production
 6. Output is written to `dist/` directory
 
+Note for reviewers: The built extension contains no external CDN references.
+All code is self-contained within the dist/ output folder.
 
 ### Dependencies
 
@@ -173,7 +175,7 @@ FocusFalcon helps users stay focused by:
 - **Blocking distracting websites** based on a user-defined list
 - **Scheduled blocking** — Block sites during specific times and days of the week
 - **Focus sessions** — Start timed focus sessions with a countdown timer
-- **Pause/Resume** — Temporarily disable blocking when neededS
+- **Pause/Resume** — Temporarily disable blocking when needed
 
 **Technical Implementation:**
 - Uses `browser.webNavigation.onBeforeNavigate` API to intercept navigations
