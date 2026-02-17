@@ -173,8 +173,7 @@ FocusFalcon helps users stay focused by:
 - **Blocking distracting websites** based on a user-defined list
 - **Scheduled blocking** — Block sites during specific times and days of the week
 - **Focus sessions** — Start timed focus sessions with a countdown timer
-- **Pause/Resume** — Temporarily disable blocking when needed
-- **Streak tracking** — Track consecutive days of maintained focus
+- **Pause/Resume** — Temporarily disable blocking when neededS
 
 **Technical Implementation:**
 - Uses `browser.webNavigation.onBeforeNavigate` API to intercept navigations
