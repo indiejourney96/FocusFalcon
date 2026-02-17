@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "Browser extension to block distracting websites during focus time",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
