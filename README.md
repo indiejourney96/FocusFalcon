@@ -1,6 +1,6 @@
 # FocusFalcon - Browser Extension
 
-A Firefox extension to help users maintain focus by blocking distracting websites during scheduled times or focus sessions.
+A Firefox/Chrome extension to help users maintain focus by blocking distracting websites during scheduled times or focus sessions.
 
 ## Build Instructions for Mozilla Reviewers
 
