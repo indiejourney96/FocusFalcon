@@ -46,23 +46,32 @@ export default function App() {
   }, []);
 
   /* -----------------------------
-     AUTO-TERMINATE FOCUS SESSION WHEN SCHEDULE BECOMES ACTIVE
-     When blockRules change (e.g. user enables a schedule in Settings),
-     check if a schedule is now active. If so, silently end any running
-     focus session — the schedule takes over, leaving only the Pause button.
+     REACT TO blockRules CHANGES
+     Two cases handled whenever blockRules updates:
+     1. Schedule just became active + focus session is running → terminate focus session
+     2. Schedule was disabled entirely → clear any stale pause state so the
+        focus session button becomes visible again
   ------------------------------*/
   useEffect(() => {
     async function handleScheduleTakeover() {
-      if (!focusSession.isActive) return;
-      if (!isWithinScheduleNow(blockRules)) return;
+      // Case 1: Schedule takeover — silently end focus session
+      if (focusSession.isActive && isWithinScheduleNow(blockRules)) {
+        await setToStorage("focusSession", {
+          isActive: false,
+          endTimestamp: null
+        });
+        setFocusSession({ isActive: false });
+        return;
+      }
 
-      // Schedule is now active and a focus session is running — terminate it
-      await setToStorage("focusSession", {
-        isActive: false,
-        endTimestamp: null
-      });
-
-      setFocusSession({ isActive: false });
+      // Case 2: Schedule disabled — clear stale pause state
+      if (!blockRules.enabled && isPaused) {
+        await setToStorage("pauseState", {
+          isPaused: false,
+          timestamp: null
+        });
+        setIsPaused(false);
+      }
     }
 
     handleScheduleTakeover();
