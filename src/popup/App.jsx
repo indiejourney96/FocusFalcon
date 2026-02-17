@@ -46,6 +46,30 @@ export default function App() {
   }, []);
 
   /* -----------------------------
+     AUTO-TERMINATE FOCUS SESSION WHEN SCHEDULE BECOMES ACTIVE
+     When blockRules change (e.g. user enables a schedule in Settings),
+     check if a schedule is now active. If so, silently end any running
+     focus session — the schedule takes over, leaving only the Pause button.
+  ------------------------------*/
+  useEffect(() => {
+    async function handleScheduleTakeover() {
+      if (!focusSession.isActive) return;
+      if (!isWithinScheduleNow(blockRules)) return;
+
+      // Schedule is now active and a focus session is running — terminate it
+      await setToStorage("focusSession", {
+        isActive: false,
+        endTimestamp: null
+      });
+
+      setFocusSession({ isActive: false });
+    }
+
+    handleScheduleTakeover();
+  }, [blockRules]); // re-runs whenever blockRules changes (e.g. settings page save)
+
+
+  /* -----------------------------
      FOCUS SESSION (NO SCHEDULE)
   ------------------------------*/
   const startFocusSession = async () => {
@@ -141,12 +165,17 @@ export default function App() {
   /* -----------------------------
      UI STATE
   ------------------------------*/
-  const scheduleActiveNow =
-    isWithinScheduleNow(blockRules) && !isPaused;
-
-  const canPauseSchedule = scheduleActiveNow;
-
+  const scheduleActiveNow = isWithinScheduleNow(blockRules) && !isPaused;
   const inFocusSession = focusSession.isActive;
+
+  // Schedule takes priority: only show schedule controls when schedule is active
+  const showPauseSchedule = scheduleActiveNow;
+  const showResumeSchedule = blockRules.enabled && isPaused;
+
+  // Focus session controls are only shown when schedule is NOT active
+  const showEndFocusSession = inFocusSession && !scheduleActiveNow;
+  const showStartFocusSession = !inFocusSession && !scheduleActiveNow && !isPaused;
+
 
   return (
     <div className="container" style={{ padding: 16, width: 300 }}>
@@ -165,9 +194,9 @@ export default function App() {
       </div>
 
 
-      {/* CASE A: Scheduled blocking active now */}
+      {/* SCHEDULE: Active → show Pause */}
       <div className="action-section">
-        {canPauseSchedule && (
+        {showPauseSchedule && (
           <HoldButton
             text="⏸ Pause Blocking (hold to confirm)"
             onHoldComplete={() => {
@@ -177,15 +206,15 @@ export default function App() {
           />
         )}
 
-
-        {blockRules.enabled && isPaused && (
+        {/* SCHEDULE: Paused → show Resume */}
+        {showResumeSchedule && (
           <button onClick={resumeBlocking} className="btn-primary">
             ▶ Resume Blocking
           </button>
         )}
 
         {/* CASE B & C: No active schedule → Focus Session */}
-        {!inFocusSession && !scheduleActiveNow && !isPaused && (
+        {showStartFocusSession && (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="input-wrapper">
               <input
@@ -203,7 +232,7 @@ export default function App() {
           </div>
         )}
 
-        {inFocusSession && (
+        {showEndFocusSession && (
           <HoldButton
             text="⛔ End Focus Session (hold to confirm)"
             onHoldComplete={endFocusSession} // call the existing function
@@ -237,7 +266,7 @@ export default function App() {
 function getEncouragingMessage(type) {
   const messages = {
     endFocusSession: [
-      "😬 Ending now…? Are you sure boss?", ,
+      "😬 Ending now…? Are you sure boss?",
       "🤔 Are you sure you want to stop? Your future 'you' might feel sad…",
       "😅 End it now? Okay boss"
     ],
