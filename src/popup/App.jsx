@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import browser from "webextension-polyfill";
 import { getFromStorage, setToStorage } from "../utils/storage.js";
 import HoldButton from "./components/HoldButton.jsx";
@@ -14,6 +14,15 @@ export default function App() {
   const [focusSession, setFocusSession] = useState({ isActive: false });
   const [blockRules, setBlockRules] = useState({ enabled: false });
   const [duration, setDuration] = useState(25);
+
+  // Blocked sites manager state
+  const [newSite, setNewSite] = useState("");
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingValue, setEditingValue] = useState("");
+  const [addError, setAddError] = useState("");
+  const [saveFlash, setSaveFlash] = useState(false);
+  const newSiteInputRef = useRef(null);
+  const editInputRef = useRef(null);
 
 
   /* -----------------------------
@@ -45,16 +54,19 @@ export default function App() {
     load();
   }, []);
 
+  // Auto-focus edit input when editing starts
+  useEffect(() => {
+    if (editingIndex !== null && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingIndex]);
+
   /* -----------------------------
      REACT TO blockRules CHANGES
-     Two cases handled whenever blockRules updates:
-     1. Schedule just became active + focus session is running → terminate focus session
-     2. Schedule was disabled entirely → clear any stale pause state so the
-        focus session button becomes visible again
   ------------------------------*/
   useEffect(() => {
     async function handleScheduleTakeover() {
-      // Case 1: Schedule takeover — silently end focus session
       if (focusSession.isActive && isWithinScheduleNow(blockRules)) {
         await setToStorage("focusSession", {
           isActive: false,
@@ -64,7 +76,6 @@ export default function App() {
         return;
       }
 
-      // Case 2: Schedule disabled — clear stale pause state
       if (!blockRules.enabled && isPaused) {
         await setToStorage("pauseState", {
           isPaused: false,
@@ -75,7 +86,7 @@ export default function App() {
     }
 
     handleScheduleTakeover();
-  }, [blockRules]); // re-runs whenever blockRules changes (e.g. settings page save)
+  }, [blockRules]);
 
 
   /* -----------------------------
@@ -93,11 +104,8 @@ export default function App() {
     });
 
     setFocusSession({ isActive: true, endTimestamp });
-
-    // 🔄 Enforce immediately
     refreshBlockedTabs();
   };
-
 
   const endFocusSession = async () => {
     const confirmed = confirm(getEncouragingMessage("endFocusSession"));
@@ -170,6 +178,110 @@ export default function App() {
     );
   };
 
+  /* -----------------------------
+     BLOCKED SITES MANAGER
+  ------------------------------*/
+  const normalizeDomain = (input) => {
+    return input
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//i, "")
+      .replace(/^www\./i, "")
+      .split("/")[0];
+  };
+
+  const isValidDomain = (domain) => {
+    return /^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z]{2,})+$/.test(domain);
+  };
+
+  const persistSites = async (updatedSites) => {
+    await setToStorage("blockedSites", updatedSites);
+    setBlockedSites(updatedSites);
+    // Flash save confirmation
+    setSaveFlash(true);
+    setTimeout(() => setSaveFlash(false), 1500);
+  };
+
+  const handleAddSite = async () => {
+    const domain = normalizeDomain(newSite);
+    setAddError("");
+
+    if (!domain) return;
+
+    if (!isValidDomain(domain)) {
+      setAddError("Enter a valid domain, e.g. reddit.com");
+      return;
+    }
+
+    if (blockedSites.includes(domain)) {
+      setAddError("Already in your list!");
+      return;
+    }
+
+    const updated = [...blockedSites, domain];
+    await persistSites(updated);
+    setNewSite("");
+    newSiteInputRef.current?.focus();
+  };
+
+  const handleAddKeyDown = (e) => {
+    if (e.key === "Enter") handleAddSite();
+    if (e.key === "Escape") {
+      setNewSite("");
+      setAddError("");
+    }
+  };
+
+  const handleRemoveSite = async (index) => {
+    const updated = blockedSites.filter((_, i) => i !== index);
+    await persistSites(updated);
+    if (editingIndex === index) {
+      setEditingIndex(null);
+      setEditingValue("");
+    }
+  };
+
+  const handleStartEdit = (index) => {
+    setEditingIndex(index);
+    setEditingValue(blockedSites[index]);
+    setAddError("");
+  };
+
+  const handleSaveEdit = async () => {
+    const domain = normalizeDomain(editingValue);
+
+    if (!isValidDomain(domain)) {
+      setAddError("Enter a valid domain, e.g. reddit.com");
+      return;
+    }
+
+    const duplicate = blockedSites.some((s, i) => s === domain && i !== editingIndex);
+    if (duplicate) {
+      setAddError("Already in your list!");
+      return;
+    }
+
+    const updated = blockedSites.map((s, i) => (i === editingIndex ? domain : s));
+    await persistSites(updated);
+    setEditingIndex(null);
+    setEditingValue("");
+    setAddError("");
+  };
+
+  const handleEditKeyDown = (e) => {
+    if (e.key === "Enter") handleSaveEdit();
+    if (e.key === "Escape") {
+      setEditingIndex(null);
+      setEditingValue("");
+      setAddError("");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setEditingValue("");
+    setAddError("");
+  };
 
   /* -----------------------------
      UI STATE
@@ -177,11 +289,8 @@ export default function App() {
   const scheduleActiveNow = isWithinScheduleNow(blockRules) && !isPaused;
   const inFocusSession = focusSession.isActive;
 
-  // Schedule takes priority: only show schedule controls when schedule is active
   const showPauseSchedule = scheduleActiveNow;
   const showResumeSchedule = blockRules.enabled && isPaused;
-
-  // Focus session controls are only shown when schedule is NOT active
   const showEndFocusSession = inFocusSession && !scheduleActiveNow;
   const showStartFocusSession = !inFocusSession && !scheduleActiveNow && !isPaused;
 
@@ -202,16 +311,15 @@ export default function App() {
         </p>
       </div>
 
-
       {/* SCHEDULE: Active → show Pause */}
       <div className="action-section">
         {showPauseSchedule && (
           <HoldButton
             text="⏸ Pause Blocking (hold to confirm)"
             onHoldComplete={() => {
-              pauseBlocking(); // retains your confirm() message
+              pauseBlocking();
             }}
-            holdTime={2000} // 2 seconds hold
+            holdTime={2000}
           />
         )}
 
@@ -222,7 +330,7 @@ export default function App() {
           </button>
         )}
 
-        {/* CASE B & C: No active schedule → Focus Session */}
+        {/* No active schedule → Focus Session */}
         {showStartFocusSession && (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="input-wrapper">
@@ -244,8 +352,8 @@ export default function App() {
         {showEndFocusSession && (
           <HoldButton
             text="⛔ End Focus Session (hold to confirm)"
-            onHoldComplete={endFocusSession} // call the existing function
-            holdTime={2000} // 2 seconds hold
+            onHoldComplete={endFocusSession}
+            holdTime={2000}
           />
         )}
       </div>
@@ -256,13 +364,89 @@ export default function App() {
         ⚙ Settings
       </button>
 
+      {/* ----------------------------------------
+          BLOCKED SITES MANAGER
+      ----------------------------------------- */}
       <div className="sites-container">
-        <span className="sites-label">Blocked Sites</span>
-        <ul className="sites-list">
-          {blockedSites.map(site => (
-            <li key={site} className="site-tag">{site}</li>
+        <div className="sites-header">
+          <span className="sites-label">Blocked Sites</span>
+          {saveFlash && <span className="save-flash">✓ Saved</span>}
+        </div>
+
+        {/* Site list with edit/remove controls */}
+        <ul className="sites-list-manage">
+          {blockedSites.length === 0 && (
+            <li className="sites-empty">No sites blocked yet. Add one below!</li>
+          )}
+          {blockedSites.map((site, index) => (
+            <li key={site} className="site-row">
+              {editingIndex === index ? (
+                /* ---- Edit mode ---- */
+                <div className="site-edit-row">
+                  <input
+                    ref={editInputRef}
+                    type="text"
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    onKeyDown={handleEditKeyDown}
+                    className="site-edit-input"
+                  />
+                  <button className="icon-btn icon-btn--confirm" onClick={handleSaveEdit} title="Save">
+                    ✓
+                  </button>
+                  <button className="icon-btn icon-btn--cancel" onClick={handleCancelEdit} title="Cancel">
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                /* ---- Display mode ---- */
+                <div className="site-display-row">
+                  <span className="site-name">{site}</span>
+                  <div className="site-actions">
+                    <button
+                      className="icon-btn icon-btn--edit"
+                      onClick={() => handleStartEdit(index)}
+                      title="Edit"
+                    >
+                      ✎
+                    </button>
+                    <button
+                      className="icon-btn icon-btn--remove"
+                      onClick={() => handleRemoveSite(index)}
+                      title="Remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
+            </li>
           ))}
         </ul>
+
+        {/* Add new site input */}
+        <div className="add-site-row">
+          <input
+            ref={newSiteInputRef}
+            type="text"
+            value={newSite}
+            onChange={(e) => {
+              setNewSite(e.target.value);
+              setAddError("");
+            }}
+            onKeyDown={handleAddKeyDown}
+            placeholder="e.g. twitter.com"
+            className="add-site-input"
+          />
+          <button
+            className="icon-btn icon-btn--add"
+            onClick={handleAddSite}
+            title="Add site"
+          >
+            +
+          </button>
+        </div>
+        {addError && <p className="sites-error">{addError}</p>}
       </div>
     </div>
   );
