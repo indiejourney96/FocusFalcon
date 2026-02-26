@@ -15,7 +15,7 @@ A Firefox/Chrome extension to help users maintain focus by blocking distracting 
 
 **1. Extract the source archive**
 ```bash
-unzip focusfalcon-source-0.1.1.zip
+unzip focusfalcon-source-0.1.2.zip
 cd focusfalcon
 ```
 
